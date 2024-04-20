@@ -15,11 +15,11 @@ export default class Plane {
 
     this.createTexture()
 
-    this.cretateGeometry()
+    this.createGeometry()
 
     this.createMaterial()
 
-    this.createMesh()
+    this.addMaterialToModel()
 
     this.calculateBounds({
       sizes: this.sizes,
@@ -31,8 +31,12 @@ export default class Plane {
     // this.texture = this.assets.textures[0]
   }
 
-  cretateGeometry() {
-    this.geometry = new THREE.PlaneGeometry(1, 1, 32, 32)
+  createGeometry() {
+    this.face = this.assets.models.face.scene.children[0]
+
+    const scale = 0.025
+
+    this.face.scale.set(scale, scale, scale)
   }
 
   createMaterial() {
@@ -43,21 +47,24 @@ export default class Plane {
       uniforms: {
         // uTexture: { value: this.texture },
         uAlpha: { value: 0 },
-        uTime: { value: 0 }
+        uTime: { value: 0 },
+        depthInfo: { value: null }
       }
     })
   }
 
-  createMesh() {
-    this.mesh = new THREE.Mesh(this.geometry, this.material)
+  addMaterialToModel() {
+    this.face.traverse(object => {
+      if (object.isMesh) {
+        object.material = this.material
+      }
+    })
   }
 
   calculateBounds({ sizes, device }) {
     this.sizes = sizes
 
     this.device = device
-
-    this.updateScale(this.device)
 
     this.updateX()
 
@@ -68,58 +75,48 @@ export default class Plane {
    * Animations
    */
   show() {
-    GSAP.fromTo(
-      this.mesh.material.uniforms.uAlpha,
-      {
-        value: 0
-      },
-      {
-        value: 1
-      }
-    )
+    // GSAP.fromTo(
+    //   this.mesh.material.uniforms.uAlpha,
+    //   {
+    //     value: 0
+    //   },
+    //   {
+    //     value: 1
+    //   }
+    // )
   }
 
   hide() {
-    GSAP.to(this.mesh.material.uniforms.uAlpha, {
-      value: 0
-    })
+    // GSAP.to(this.mesh.material.uniforms.uAlpha, {
+    //   value: 0
+    // })
   }
   /**
    * events
    */
   onResize(value) {
     this.calculateBounds(value)
+
+    this.updateScale(this.device)
   }
 
   /**
    * update
    */
 
-  updateScale() {
-    // console.log('plane device : ', this.device)
-
-    if (this.device === 'sp') {
-      this.mesh.scale.x = this.sizes.width / 2
-
-      this.mesh.scale.y = this.sizes.width / 2
-    } else {
-      this.mesh.scale.x = this.sizes.height / 2
-
-      this.mesh.scale.y = this.sizes.height / 2
-    }
-  }
+  updateScale() {}
 
   updateX(x = 0) {}
 
   updateY(y = 0) {}
 
-  update({ scroll, time }) {
+  update({ scroll, time, controledParams, depthInfo }) {
     this.updateX(scroll.x)
 
     this.updateY(scroll.y)
 
-    this.mesh.rotation.y += time.delta
-
     this.material.uniforms.uTime.value = time.current
+
+    this.material.uniforms.uAlpha.value = controledParams.alpha
   }
 }

@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import vertex from '@js/shaders/vertex.glsl'
 import fragment from '@js/shaders/fragment.glsl'
 
-export default class Plane {
+export default class StretchPlane {
   constructor({ sizes, device, assets }) {
     this.sizes = sizes
 
@@ -33,7 +33,7 @@ export default class Plane {
   }
 
   cretateGeometry() {
-    this.geometry = new THREE.PlaneGeometry(1, 1, 32, 32)
+    this.geometry = new THREE.PlaneGeometry(1, 0.01, 32, 32)
   }
 
   createMaterial() {
@@ -44,7 +44,8 @@ export default class Plane {
       uniforms: {
         // uTexture: { value: this.texture },
         uAlpha: { value: 0 },
-        uTime: { value: 0 }
+        uTime: { value: 0 },
+        depthInfo: { value: null }
       }
     })
   }
@@ -97,32 +98,24 @@ export default class Plane {
    */
 
   updateScale() {
-    // console.log('plane device : ', this.device)
+    const scale = [1.0, 1.0, 1.0]
 
-    if (this.device === 'sp') {
-      this.mesh.scale.x = this.sizes.width / 2
-
-      this.mesh.scale.y = this.sizes.width / 2
-    } else {
-      this.mesh.scale.x = this.sizes.height / 2
-
-      this.mesh.scale.y = this.sizes.height / 2
-    }
+    this.mesh.scale.set(...scale)
   }
 
   updateX(x = 0) {}
 
   updateY(y = 0) {}
 
-  update({ scroll, time, params }) {
+  update({ scroll, time, controledParams, depthInfo }) {
     this.updateX(scroll.x)
 
     this.updateY(scroll.y)
 
-    this.mesh.rotation.y += time.delta
+    // this.material.uniforms.uTime.value = time.current
 
-    this.material.uniforms.uTime.value = time.current
+    this.mesh.material.uniforms.uAlpha.value = controledParams.alpha
 
-    this.mesh.material.uniforms.uAlpha.value = params.alpha
+    this.mesh.material.uniforms.depthInfo.value = depthInfo
   }
 }

@@ -1,10 +1,12 @@
 import GSAP from 'gsap'
 import { PerspectiveCamera, WebGLRenderer, Scene, Clock } from 'three'
 
+import * as THREE from 'three'
+
 import { Pane } from 'tweakpane'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
-import PostProcessPipeline from './class/PostProcessPipeline'
+import PostProcessPipeline from './postprocess/PostProcessPipeline'
 
 import Home from './Home'
 
@@ -13,6 +15,8 @@ export default class Canvas {
     this.template = template
 
     this.container = dom
+
+    this.bounds = this.container.getBoundingClientRect()
 
     this.device = device
 
@@ -35,6 +39,8 @@ export default class Canvas {
     }
 
     this.createRenderer()
+
+    this.createRendererTargetForDepthMap()
 
     this.createScene()
 
@@ -66,6 +72,25 @@ export default class Canvas {
     this.container.appendChild(this.renderer.domElement)
   }
 
+  createRendererTargetForDepthMap() {
+    this.rendererTargetForDepth = new THREE.WebGLRenderTarget(
+      window.innerWidth,
+      window.innerHeight
+    )
+
+    this.rendererTargetForDepth.texture.minFilter = THREE.NearestFilter
+
+    this.rendererTargetForDepth.texture.magFilter = THREE.NearestFilter
+
+    this.rendererTargetForDepth.stencilBuffer = false
+
+    this.rendererTargetForDepth.depthTexture = new THREE.DepthTexture()
+
+    this.rendererTargetForDepth.depthTexture.format = THREE.DepthFormat
+
+    this.rendererTargetForDepth.depthTexture.type = THREE.UnsignedShortType
+  }
+
   createScene() {
     this.scene = new Scene()
   }
@@ -84,11 +109,11 @@ export default class Canvas {
   createPane() {
     this.pane = new Pane()
 
-    this.PARAMS = {
+    this.controledParams = {
       alpha: 1
     }
 
-    this.pane.addBinding(this.PARAMS, 'alpha', {
+    this.pane.addBinding(this.controledParams, 'alpha', {
       min: 0,
       max: 1,
       step: 0.01
@@ -142,6 +167,8 @@ export default class Canvas {
   }
 
   onResize(device) {
+    this.bounds = this.container.getBoundingClientRect()
+
     this.renderer.setSize(window.innerWidth, window.innerHeight)
 
     const aspect = window.innerWidth / window.innerHeight
@@ -163,13 +190,9 @@ export default class Canvas {
       device: device
     }
 
-    if (this.home) {
-      this.home.onResize(values)
-    }
+    this.home?.onResize(values)
 
-    if (this.postProcessPipeline) {
-      this.postProcessPipeline.resize(values)
-    }
+    this.postProcessPipeline?.resize(values)
 
     this.camera.aspect = aspect
 
@@ -300,11 +323,12 @@ export default class Canvas {
   /**loop */
 
   update(scroll) {
-    if (this.home) {
+    if (this.home && this.rendererTargetForDepth) {
       this.home.update({
         scroll: scroll,
         time: this.time,
-        params: this.PARAMS
+        controledParams: this.controledParams,
+        depthInfo: this.rendererTargetForDepth.texture
       })
     }
 
@@ -313,6 +337,14 @@ export default class Canvas {
     this.time.previous = this.time.current
 
     this.time.current += this.time.delta
+
+    this.renderer.setRenderTarget(this.rendererTargetForDepth)
+
+    this.renderer.render(this.scene, this.camera)
+
+    this.renderer.setRenderTarget(null)
+
+    this.renderer.render(this.scene, this.camera)
 
     this.postProcessPipeline.render()
   }
