@@ -3,16 +3,18 @@ import GSAP from 'gsap'
 import { ShaderMaterial, Mesh } from 'three'
 import * as THREE from 'three'
 
-import vertex from '@js/shaders/vertex.glsl'
-import fragment from '@js/shaders/fragment.glsl'
+import vertex from '@js/shaders/face-vertex.glsl'
+import fragment from '@js/shaders/face-fragment.glsl'
 
 export default class StretchPlane {
-  constructor({ sizes, device, assets }) {
+  constructor({ sizes, device, assets, camera }) {
     this.sizes = sizes
 
     this.device = device
 
     this.assets = assets
+
+    this.camera = camera
 
     this.createTexture()
 
@@ -33,7 +35,7 @@ export default class StretchPlane {
   }
 
   cretateGeometry() {
-    this.geometry = new THREE.PlaneGeometry(1, 0.01, 32, 32)
+    this.geometry = new THREE.PlaneGeometry(2, 0.005, 100, 1)
   }
 
   createMaterial() {
@@ -45,7 +47,9 @@ export default class StretchPlane {
         // uTexture: { value: this.texture },
         uAlpha: { value: 0 },
         uTime: { value: 0 },
-        depthInfo: { value: null }
+        depthInfo: { value: null },
+        cameraNear: { value: this.camera.near },
+        cameraFar: { value: this.camera.far }
       }
     })
   }
@@ -112,7 +116,7 @@ export default class StretchPlane {
 
     this.updateY(scroll.y)
 
-    // this.material.uniforms.uTime.value = time.current
+    this.material.uniforms.uTime.value = time.current
 
     this.mesh.material.uniforms.uAlpha.value = controledParams.alpha
 

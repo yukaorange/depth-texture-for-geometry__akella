@@ -10,14 +10,18 @@ import Plane from './object/Plane'
 import StretchPlane from './object/StretchPlane'
 
 export default class Home {
-  constructor({ scene, sizes, device, assets }) {
+  constructor({ scene, modelScene, sizes, device, assets, camera }) {
     this.scene = scene
+
+    this.modelScene = modelScene
 
     this.sizes = sizes
 
     this.device = device
 
     this.assets = assets
+
+    this.camera = camera
 
     this.x = {
       current: 0,
@@ -50,9 +54,9 @@ export default class Home {
 
     this.createModel()
 
-    this.createPlaneArray()
+    this.createStrechPlane()
 
-    this.createPlane()
+    // this.createPlane()
 
     this.onResize({
       sizes: this.sizes,
@@ -69,22 +73,44 @@ export default class Home {
       assets: this.assets
     })
 
-    this.scene.add(this.model.face)
+    this.modelScene.add(this.model.face)
+
+    // this.scene.add(this.model.face)
   }
 
-  createPlaneArray() {
+  createStrechPlane() {
     this.strechPlane = new StretchPlane({
       sizes: this.sizes,
       device: this.device,
-      assets: this.assets
+      assets: this.assets,
+      camera: this.camera
     })
 
-    let number = 20
+    let number = 100
 
-    for (let i = 0; i < number; i++) {
-      let mesh = this.strechPlane.mesh.clone()
+    for (let i = 0; i <= number; i++) {
+      const material = this.strechPlane.mesh.material
 
-      mesh.position.y = (i - number / 2) / number
+      const geometry = new THREE.PlaneGeometry(2, 0.005, 300, 1)
+
+      const len = geometry.attributes.position.array.length
+
+      let y = []
+
+      for (let j = 0; j < len / 3; j++) {
+        y.push(i / number)
+      }
+
+      geometry.setAttribute(
+        'y',
+        new THREE.BufferAttribute(new Float32Array(y), 1)
+      )
+
+      const mesh = new THREE.Mesh(geometry, material)
+
+      let calcedPos = ((i - number / 2) / number) * 2
+
+      mesh.position.y = calcedPos
 
       this.scene.add(mesh)
     }
@@ -94,7 +120,8 @@ export default class Home {
     this.plane = new Plane({
       sizes: this.sizes,
       device: this.device,
-      assets: this.assets
+      assets: this.assets,
+      camera: this.camera
     })
 
     this.scene.add(this.plane.mesh)

@@ -3,16 +3,18 @@ import GSAP from 'gsap'
 import { ShaderMaterial, Mesh } from 'three'
 import * as THREE from 'three'
 
-import vertex from '@js/shaders/vertex.glsl'
-import fragment from '@js/shaders/fragment.glsl'
+import vertex from '@js/shaders/face-vertex.glsl'
+import fragment from '@js/shaders/face-fragment.glsl'
 
 export default class Plane {
-  constructor({ sizes, device, assets }) {
+  constructor({ sizes, device, assets, camera }) {
     this.sizes = sizes
 
     this.device = device
 
     this.assets = assets
+
+    this.camera = camera
 
     this.createTexture()
 
@@ -33,7 +35,7 @@ export default class Plane {
   }
 
   cretateGeometry() {
-    this.geometry = new THREE.PlaneGeometry(1, 1, 32, 32)
+    this.geometry = new THREE.PlaneGeometry(2, 2, 32, 32)
   }
 
   createMaterial() {
@@ -45,7 +47,9 @@ export default class Plane {
         // uTexture: { value: this.texture },
         uAlpha: { value: 0 },
         uTime: { value: 0 },
-        depthInfo: { value: null }
+        depthInfo: { value: null },
+        cameraNear: { value: this.camera.near },
+        cameraFar: { value: this.camera.far }
       }
     })
   }
@@ -98,7 +102,7 @@ export default class Plane {
    */
 
   updateScale() {
-    const scale = [1.0, 1.0, 1.0]
+    const scale = [1, 1, 1]
 
     this.mesh.scale.set(...scale)
   }
@@ -115,5 +119,7 @@ export default class Plane {
     // this.material.uniforms.uTime.value = time.current
 
     this.mesh.material.uniforms.uAlpha.value = controledParams.alpha
+
+    this.mesh.material.uniforms.depthInfo.value = depthInfo
   }
 }

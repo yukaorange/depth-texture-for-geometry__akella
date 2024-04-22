@@ -34,22 +34,28 @@ export default class Plane {
   createGeometry() {
     this.face = this.assets.models.face.scene.children[0]
 
-    const scale = 0.025
+    const scale = 0.075
 
     this.face.scale.set(scale, scale, scale)
+
+    this.face.position.set(0, 0, -1)
   }
 
   createMaterial() {
-    this.material = new THREE.ShaderMaterial({
-      vertexShader: vertex,
-      fragmentShader: fragment,
-      side: THREE.DoubleSide,
-      uniforms: {
-        // uTexture: { value: this.texture },
-        uAlpha: { value: 0 },
-        uTime: { value: 0 },
-        depthInfo: { value: null }
-      }
+    // this.material = new THREE.ShaderMaterial({
+    //   vertexShader: vertex,
+    //   fragmentShader: fragment,
+    //   side: THREE.DoubleSide,
+    //   uniforms: {
+    //     // uTexture: { value: this.texture },
+    //     uAlpha: { value: 0 },
+    //     uTime: { value: 0 },
+    //     depthInfo: { value: null }
+    //   }
+    // })
+
+    this.material = new THREE.MeshBasicMaterial({
+      color: 0x000000
     })
   }
 
@@ -115,8 +121,11 @@ export default class Plane {
 
     this.updateY(scroll.y)
 
-    this.material.uniforms.uTime.value = time.current
+    this.face.position.z = -0.9 + 0.1 * Math.sin(time.current)
 
-    this.material.uniforms.uAlpha.value = controledParams.alpha
+    this.face.rotation.z = 0.2 * Math.cos(time.current)
+
+
+    // this.material.uniforms.uAlpha.value = controledParams.alpha
   }
 }

@@ -44,7 +44,11 @@ export default class Canvas {
 
     this.createScene()
 
+    this.createModelScene()
+
     this.createCamera()
+
+    this.createDepthCamera()
 
     this.createPane()
 
@@ -63,7 +67,7 @@ export default class Canvas {
       antialias: true
     })
 
-    this.renderer.setClearColor(0x000000, 0)
+    this.renderer.setClearColor(0x000000, 1)
 
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
@@ -95,6 +99,10 @@ export default class Canvas {
     this.scene = new Scene()
   }
 
+  createModelScene() {
+    this.modelScene = new Scene()
+  }
+
   createCamera() {
     const fov = 45
     const aspect = window.innerWidth / window.innerHeight
@@ -103,7 +111,18 @@ export default class Canvas {
 
     this.camera = new PerspectiveCamera(fov, aspect, near, far)
 
-    this.camera.position.z = 5
+    this.camera.position.z = 3
+  }
+
+  createDepthCamera() {
+    const fov = 45
+    const aspect = window.innerWidth / window.innerHeight
+    const near = 2
+    const far = 3
+
+    this.depthCamera = new PerspectiveCamera(fov, aspect, near, far)
+
+    this.depthCamera.position.z = 2
   }
 
   createPane() {
@@ -132,6 +151,8 @@ export default class Canvas {
   createHome() {
     this.home = new Home({
       scene: this.scene,
+      modelScene: this.modelScene,
+      camera: this.depthCamera,
       sizes: this.sizes,
       device: this.device,
       assets: this.assets
@@ -196,7 +217,12 @@ export default class Canvas {
 
     this.camera.aspect = aspect
 
+    // this.depthCamera.aspect = aspect
+    this.depthCamera.aspect = 1
+
     this.camera.updateProjectionMatrix()
+
+    this.depthCamera.updateProjectionMatrix()
   }
 
   onTouchDown(event) {
@@ -323,15 +349,6 @@ export default class Canvas {
   /**loop */
 
   update(scroll) {
-    if (this.home && this.rendererTargetForDepth) {
-      this.home.update({
-        scroll: scroll,
-        time: this.time,
-        controledParams: this.controledParams,
-        depthInfo: this.rendererTargetForDepth.texture
-      })
-    }
-
     this.time.delta = this.clock.getDelta()
 
     this.time.previous = this.time.current
@@ -340,12 +357,24 @@ export default class Canvas {
 
     this.renderer.setRenderTarget(this.rendererTargetForDepth)
 
-    this.renderer.render(this.scene, this.camera)
+    this.renderer.render(this.modelScene, this.depthCamera)
+
+    let depthTexture = this.rendererTargetForDepth.depthTexture
+
+    if (this.home) {
+      this.home.update({
+        scroll: scroll,
+        time: this.time,
+        controledParams: this.controledParams,
+        camera: this.depthCamera,
+        depthInfo: depthTexture
+      })
+    }
 
     this.renderer.setRenderTarget(null)
 
     this.renderer.render(this.scene, this.camera)
 
-    this.postProcessPipeline.render()
+    // this.postProcessPipeline.render()
   }
 }
