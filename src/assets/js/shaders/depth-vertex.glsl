@@ -5,10 +5,13 @@ precision mediump float;
 
 float PI = 3.14159265359;
 
-varying vec2 vUv;
-varying vec2 newUv;
-
 varying float vDepth;
+varying float vStrength;
+
+varying vec2 vUv;
+
+varying vec3 vPosition;
+varying vec3 vNormal;
 
 uniform sampler2D depthInfo;
 
@@ -33,13 +36,35 @@ void main() {
 
   vec3 pos = position;
 
+  vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+
+  vNormal = normalMatrix * normal;
+
+  vPosition = modelPosition.xyz;
+
   float depth = readDepth(depthInfo, newUv);
 
   depth = 1.0 - depth;//invert depth to positive z orientation
 
   pos.z += depth;
 
-  pos.y += .01 * snoise(vec3(vec2(newUv * 18.75), uTime));
+  pos.y += .001 * snoise(vec3(vec2(newUv * 18.75), uTime));
+
+  float interval = uTime - modelPosition.y;
+
+  float strength = sin(interval * 2.12) + sin(interval * 4.3) + sin(interval * 5.76);
+
+  strength = smoothstep(0.1, 1.0, strength);
+
+  strength = abs(strength);
+
+  strength *= 0.05;
+
+  pos.y += snoise(modelPosition.xyz * 1.0) * strength;
+
+  pos.z += snoise(modelPosition.xyz * 100.0) * strength;
+
+  vStrength = strength;
 
   vDepth = depth;
 

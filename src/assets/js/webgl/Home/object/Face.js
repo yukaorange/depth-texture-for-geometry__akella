@@ -34,7 +34,11 @@ export default class Plane {
   createGeometry() {
     this.face = this.assets.models.face.scene.children[0]
 
-    const scale = 0.075
+    this.face.geometry.center()
+
+    this.face.rotation.x = Math.PI * (3.2 / 2)
+
+    const scale = 0.08
 
     this.face.scale.set(scale, scale, scale)
 
@@ -42,18 +46,6 @@ export default class Plane {
   }
 
   createMaterial() {
-    // this.material = new THREE.ShaderMaterial({
-    //   vertexShader: vertex,
-    //   fragmentShader: fragment,
-    //   side: THREE.DoubleSide,
-    //   uniforms: {
-    //     // uTexture: { value: this.texture },
-    //     uAlpha: { value: 0 },
-    //     uTime: { value: 0 },
-    //     depthInfo: { value: null }
-    //   }
-    // })
-
     this.material = new THREE.MeshBasicMaterial({
       color: 0x000000
     })
@@ -80,37 +72,37 @@ export default class Plane {
   /**
    * Animations
    */
-  show() {
-    // GSAP.fromTo(
-    //   this.mesh.material.uniforms.uAlpha,
-    //   {
-    //     value: 0
-    //   },
-    //   {
-    //     value: 1
-    //   }
-    // )
-  }
+  show() {}
 
-  hide() {
-    // GSAP.to(this.mesh.material.uniforms.uAlpha, {
-    //   value: 0
-    // })
-  }
+  hide() {}
   /**
    * events
    */
   onResize(value) {
     this.calculateBounds(value)
 
-    this.updateScale(this.device)
+    this.updateScale({
+      device: this.device
+    })
   }
 
   /**
    * update
    */
 
-  updateScale() {}
+  updateScale({ device }) {
+    let scale
+
+    if (device == 'pc') {
+      scale = 0.08
+    }
+
+    if (device == 'sp') {
+      scale = 0.04
+    }
+
+    this.face.scale.set(scale, scale, scale)
+  }
 
   updateX(x = 0) {}
 
@@ -121,11 +113,8 @@ export default class Plane {
 
     this.updateY(scroll.y)
 
-    this.face.position.z = -0.9 + 0.1 * Math.sin(time.current)
+    this.face.position.z = -0.49 + 0.01 * Math.sin(time.current)
 
-    this.face.rotation.z = 0.2 * Math.cos(time.current)
-
-
-    // this.material.uniforms.uAlpha.value = controledParams.alpha
+    // this.face.rotation.z = 0.2 * Math.cos(time.current)
   }
 }

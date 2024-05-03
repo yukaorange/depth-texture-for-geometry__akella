@@ -7,7 +7,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 
 // const modelPass = '/model/human.gltf'
-const modelPass = '/model/face.glb'
+const modelPass = '/model/hand-bone.glb'
 const envPass = '/textures/hologram-map.webp'
 
 export default class Preloader extends Component {

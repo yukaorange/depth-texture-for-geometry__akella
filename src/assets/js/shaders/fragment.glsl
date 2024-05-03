@@ -18,9 +18,6 @@ void main() {
 
   color.z = sin(time);
 
-  vec3 testColor = vec3(uv.x);
-
   gl_FragColor = vec4(color, uAlpha);
 
-  // gl_FragColor = vec4(testColor, 1.0);
 }

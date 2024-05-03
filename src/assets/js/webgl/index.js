@@ -52,7 +52,7 @@ export default class Canvas {
 
     this.createPane()
 
-    this.createControls()
+    // this.createControls()
 
     this.createClock()
 
@@ -67,7 +67,7 @@ export default class Canvas {
       antialias: true
     })
 
-    this.renderer.setClearColor(0x000000, 1)
+    this.renderer.setClearColor(0x000000, 1.0)
 
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
@@ -137,6 +137,9 @@ export default class Canvas {
       max: 1,
       step: 0.01
     })
+
+    //hide
+    this.pane.containerElem_.style.display = 'none'
   }
 
   createControls() {

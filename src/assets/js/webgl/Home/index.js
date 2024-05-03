@@ -86,12 +86,12 @@ export default class Home {
       camera: this.camera
     })
 
-    let number = 100
+    let number = 200
 
     for (let i = 0; i <= number; i++) {
       const material = this.strechPlane.mesh.material
 
-      const geometry = new THREE.PlaneGeometry(2, 0.005, 300, 1)
+      const geometry = new THREE.PlaneGeometry(2, 0.001, 300, 1)
 
       const len = geometry.attributes.position.array.length
 

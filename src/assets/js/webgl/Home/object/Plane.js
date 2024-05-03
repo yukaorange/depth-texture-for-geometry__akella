@@ -3,8 +3,8 @@ import GSAP from 'gsap'
 import { ShaderMaterial, Mesh } from 'three'
 import * as THREE from 'three'
 
-import vertex from '@js/shaders/face-vertex.glsl'
-import fragment from '@js/shaders/face-fragment.glsl'
+import vertex from '@js/shaders/depth-vertex.glsl'
+import fragment from '@js/shaders/depth-fragment.glsl'
 
 export default class Plane {
   constructor({ sizes, device, assets, camera }) {
