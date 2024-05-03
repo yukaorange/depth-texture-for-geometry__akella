@@ -69,7 +69,7 @@ export default class Canvas {
 
     this.renderer.setClearColor(0x000000, 1.0)
 
-    this.renderer.setPixelRatio(window.devicePixelRatio)
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
     this.renderer.setSize(window.innerWidth, window.innerHeight)
 
