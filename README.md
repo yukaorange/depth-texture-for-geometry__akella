@@ -2,11 +2,11 @@
 
 It use depth map in vertex shader.
 
-[msdf](https://github.com/leochocolat/three-msdf-text-utils)
+[depth texture](https://threejs.org/docs/#api/en/renderers/WebGLRenderTarget.depthTexture)
 
-https://mdsf-text.vercel.app/
+https://depth-texture-for-geometry-akella.vercel.app/
 
-![image](https://github.com/yukaorange/mdsf-text/assets/98954503/eff05604-f138-4772-9a20-1e2b8df37584)
+![image](https://github.com/yukaorange/depth-texture-for-geometry__akella/assets/98954503/896d0f7d-dc1f-490d-87de-e10509d886b6)
 
 # References
 
