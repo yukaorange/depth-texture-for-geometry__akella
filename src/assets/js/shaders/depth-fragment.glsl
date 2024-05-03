@@ -22,9 +22,9 @@ varying float vStrength;
 
 void main() {
 
-  float toMix = smoothstep(0.25, 1., vDepth);
+  float toMix = smoothstep(0.2, 0.65, vDepth);
 
-  float colotMix = smoothstep(0.0, 0.001, vStrength*100.);
+  float colotMix = smoothstep(0.0, 0.001, vStrength);
 
   float r = 0.12 + vStrength * 1.;
   float g = 0.93 + vStrength * 10.;
