@@ -1,7 +1,7 @@
 import PostProcessPass from './PostProcessPass'
 import { WebGLRenderTarget } from 'three'
 
-import BlueFragment from '../../shaders/blue-fragment.glsl'
+import BlueFragment from '../../shaders/filter/blue-fragment.glsl'
 import vertex from '../../shaders/post-vertex.glsl'
 
 export default class BluePass extends PostProcessPass {

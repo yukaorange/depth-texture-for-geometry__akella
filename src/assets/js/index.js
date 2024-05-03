@@ -63,7 +63,8 @@ class App {
     this.canvas = new Canvas({
       template: this.template,
       dom: document.querySelector('#webgl'),
-      device: this.device
+      device: this.device,
+      assets: this.assets
     })
   }
 
@@ -77,6 +78,9 @@ class App {
     })
   }
 
+  /**
+   * app starts to create  webgl experience and show page.
+   */
   onPreloaded() {
     this.onResize()
 

@@ -1,20 +1,26 @@
 import GSAP from 'gsap'
 import { PerspectiveCamera, WebGLRenderer, Scene, Clock } from 'three'
 
+import * as THREE from 'three'
+
 import { Pane } from 'tweakpane'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
-import PostProcessPipeline from './class/PostProcessPipeline'
+import PostProcessPipeline from './postprocess/PostProcessPipeline'
 
 import Home from './Home'
 
 export default class Canvas {
-  constructor({ template, dom, device }) {
+  constructor({ template, dom, device, assets }) {
     this.template = template
 
     this.container = dom
 
+    this.bounds = this.container.getBoundingClientRect()
+
     this.device = device
+
+    this.assets = assets
 
     this.x = {
       start: 0,
@@ -34,13 +40,19 @@ export default class Canvas {
 
     this.createRenderer()
 
+    this.createRendererTargetForDepthMap()
+
     this.createScene()
+
+    this.createModelScene()
 
     this.createCamera()
 
+    this.createDepthCamera()
+
     this.createPane()
 
-    this.createControls()
+    // this.createControls()
 
     this.createClock()
 
@@ -55,7 +67,7 @@ export default class Canvas {
       antialias: true
     })
 
-    this.renderer.setClearColor(0x000000, 0)
+    this.renderer.setClearColor(0x000000, 1.0)
 
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
@@ -64,8 +76,31 @@ export default class Canvas {
     this.container.appendChild(this.renderer.domElement)
   }
 
+  createRendererTargetForDepthMap() {
+    this.rendererTargetForDepth = new THREE.WebGLRenderTarget(
+      window.innerWidth,
+      window.innerHeight
+    )
+
+    this.rendererTargetForDepth.texture.minFilter = THREE.NearestFilter
+
+    this.rendererTargetForDepth.texture.magFilter = THREE.NearestFilter
+
+    this.rendererTargetForDepth.stencilBuffer = false
+
+    this.rendererTargetForDepth.depthTexture = new THREE.DepthTexture()
+
+    this.rendererTargetForDepth.depthTexture.format = THREE.DepthFormat
+
+    this.rendererTargetForDepth.depthTexture.type = THREE.UnsignedShortType
+  }
+
   createScene() {
     this.scene = new Scene()
+  }
+
+  createModelScene() {
+    this.modelScene = new Scene()
   }
 
   createCamera() {
@@ -76,21 +111,35 @@ export default class Canvas {
 
     this.camera = new PerspectiveCamera(fov, aspect, near, far)
 
-    this.camera.position.z = 5
+    this.camera.position.z = 3
+  }
+
+  createDepthCamera() {
+    const fov = 45
+    const aspect = window.innerWidth / window.innerHeight
+    const near = 2
+    const far = 3
+
+    this.depthCamera = new PerspectiveCamera(fov, aspect, near, far)
+
+    this.depthCamera.position.z = 2
   }
 
   createPane() {
     this.pane = new Pane()
 
-    this.PARAMS = {
+    this.controledParams = {
       alpha: 1
     }
 
-    this.pane.addBinding(this.PARAMS, 'alpha', {
+    this.pane.addBinding(this.controledParams, 'alpha', {
       min: 0,
       max: 1,
       step: 0.01
     })
+
+    //hide
+    this.pane.containerElem_.style.display = 'none'
   }
 
   createControls() {
@@ -105,8 +154,11 @@ export default class Canvas {
   createHome() {
     this.home = new Home({
       scene: this.scene,
+      modelScene: this.modelScene,
+      camera: this.depthCamera,
       sizes: this.sizes,
-      device: this.device
+      device: this.device,
+      assets: this.assets
     })
   }
 
@@ -139,6 +191,8 @@ export default class Canvas {
   }
 
   onResize(device) {
+    this.bounds = this.container.getBoundingClientRect()
+
     this.renderer.setSize(window.innerWidth, window.innerHeight)
 
     const aspect = window.innerWidth / window.innerHeight
@@ -160,17 +214,18 @@ export default class Canvas {
       device: device
     }
 
-    if (this.home) {
-      this.home.onResize(values)
-    }
+    this.home?.onResize(values)
 
-    if (this.postProcessPipeline) {
-      this.postProcessPipeline.resize(values)
-    }
+    this.postProcessPipeline?.resize(values)
 
     this.camera.aspect = aspect
 
+    // this.depthCamera.aspect = aspect
+    this.depthCamera.aspect = 1
+
     this.camera.updateProjectionMatrix()
+
+    this.depthCamera.updateProjectionMatrix()
   }
 
   onTouchDown(event) {
@@ -297,20 +352,32 @@ export default class Canvas {
   /**loop */
 
   update(scroll) {
-    if (this.home) {
-      this.home.update({
-        scroll: scroll,
-        time: this.time
-      })
-      this.home.setParameter(this.PARAMS)
-    }
-
     this.time.delta = this.clock.getDelta()
 
     this.time.previous = this.time.current
 
     this.time.current += this.time.delta
 
-    this.postProcessPipeline.render()
+    this.renderer.setRenderTarget(this.rendererTargetForDepth)
+
+    this.renderer.render(this.modelScene, this.depthCamera)
+
+    let depthTexture = this.rendererTargetForDepth.depthTexture
+
+    if (this.home) {
+      this.home.update({
+        scroll: scroll,
+        time: this.time,
+        controledParams: this.controledParams,
+        camera: this.depthCamera,
+        depthInfo: depthTexture
+      })
+    }
+
+    this.renderer.setRenderTarget(null)
+
+    this.renderer.render(this.scene, this.camera)
+
+    // this.postProcessPipeline.render()
   }
 }

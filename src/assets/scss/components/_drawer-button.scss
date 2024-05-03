@@ -1,0 +1,17 @@
+.drawer-button {
+  background-color: #fff;
+  position: absolute;
+  right: calc(var(--col) * 2);
+  top: 2.4rem;
+  padding-inline: calc(var(--col) * 0.25);
+  padding-bottom: 0.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.drawer-button__text--menu {
+}
+
+.drawer-button__text--close {
+  display: none;
+}

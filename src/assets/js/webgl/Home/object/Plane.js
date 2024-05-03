@@ -3,18 +3,22 @@ import GSAP from 'gsap'
 import { ShaderMaterial, Mesh } from 'three'
 import * as THREE from 'three'
 
-import vertex from '@js/shaders/vertex.glsl'
-import fragment from '@js/shaders/fragment.glsl'
+import vertex from '@js/shaders/depth-vertex.glsl'
+import fragment from '@js/shaders/depth-fragment.glsl'
 
 export default class Plane {
-  constructor({ geometry, sizes, device }) {
-    this.geometry = geometry
-
+  constructor({ sizes, device, assets, camera }) {
     this.sizes = sizes
 
     this.device = device
 
+    this.assets = assets
+
+    this.camera = camera
+
     this.createTexture()
+
+    this.cretateGeometry()
 
     this.createMaterial()
 
@@ -27,7 +31,11 @@ export default class Plane {
   }
 
   createTexture() {
-    // this.texture = window.TEXTURES[0]
+    // this.texture = this.assets.textures[0]
+  }
+
+  cretateGeometry() {
+    this.geometry = new THREE.PlaneGeometry(2, 2, 32, 32)
   }
 
   createMaterial() {
@@ -38,7 +46,10 @@ export default class Plane {
       uniforms: {
         // uTexture: { value: this.texture },
         uAlpha: { value: 0 },
-        uTime: { value: 0 }
+        uTime: { value: 0 },
+        depthInfo: { value: null },
+        cameraNear: { value: this.camera.near },
+        cameraFar: { value: this.camera.far }
       }
     })
   }
@@ -51,8 +62,6 @@ export default class Plane {
     this.sizes = sizes
 
     this.device = device
-
-    this.updateScale(this.device)
 
     this.updateX()
 
@@ -84,6 +93,8 @@ export default class Plane {
    */
   onResize(value) {
     this.calculateBounds(value)
+
+    this.updateScale(this.device)
   }
 
   /**
@@ -91,34 +102,24 @@ export default class Plane {
    */
 
   updateScale() {
-    // console.log('plane device : ', this.device)
+    const scale = [1, 1, 1]
 
-    if (this.device === 'sp') {
-      this.mesh.scale.x = this.sizes.width / 2
-
-      this.mesh.scale.y = this.sizes.width / 2
-    } else {
-      this.mesh.scale.x = this.sizes.height / 2
-
-      this.mesh.scale.y = this.sizes.height / 2
-    }
+    this.mesh.scale.set(...scale)
   }
 
   updateX(x = 0) {}
 
   updateY(y = 0) {}
 
-  update({ scroll, time }) {
+  update({ scroll, time, controledParams, depthInfo }) {
     this.updateX(scroll.x)
 
     this.updateY(scroll.y)
 
-    this.mesh.rotation.y += time.delta
+    // this.material.uniforms.uTime.value = time.current
 
-    this.material.uniforms.uTime.value = time.current
-  }
+    this.mesh.material.uniforms.uAlpha.value = controledParams.alpha
 
-  setParameter(params) {
-    this.mesh.material.uniforms.uAlpha.value = params.alpha
+    this.mesh.material.uniforms.depthInfo.value = depthInfo
   }
 }
