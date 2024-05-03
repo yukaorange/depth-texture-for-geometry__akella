@@ -10,4 +10,4 @@ https://depth-texture-for-geometry-akella.vercel.app/
 
 # References
 
-- [reference](https://gist.github.com/yiwenl/3f804e80d0930e34a0b33359259b556c)
+- [reference](https://www.youtube.com/watch?v=UaAX2_EToqk)

@@ -56,6 +56,9 @@ body {
   line-height: 1.5;
   letter-spacing: 0.1em;
 
+  overflow: hidden;
+  height: 100svh;
+
   font-family: "Noto Sans JP", YuGothic, "游ゴシック Medium", "Yu Gothic Medium", "游ゴシック", "Yu Gothic", sans-serif;
 }
 
@@ -99,6 +102,10 @@ h6 {
 // Safari対策
 a[href^="tel"] {
   text-decoration: none;
+}
+
+button {
+  color: var(--black-1);
 }
 
 [data-device="sp"] {
